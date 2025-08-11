@@ -1,0 +1,22 @@
+---
+import ExperienceItem from "./ExperienceItem.astro"
+const EXPERIENCE = [
+  {
+    date: "June 2024 – August 2024",
+    title: "Data Analyst Intern",
+    company: "IBM | Delhi, India",
+    description:
+      "During my internship, I developed a Water Quality Prediction Model using Kaggle datasets, cleaning and preprocessing raw data with Pandas and Excel for accurate model input. I also built interactive Power BI dashboards to visualize KPIs and trends, and created visualizations to highlight relationships between different water quality parameters for better analysis.",
+  },
+]
+---
+
+<ol class="relative mt-16">
+  {
+    EXPERIENCE.map((experience) => (
+      <li class="">
+        <ExperienceItem {...experience} />
+      </li>
+    ))
+  }
+</ol>

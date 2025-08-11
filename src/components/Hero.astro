@@ -1,0 +1,44 @@
+---
+const personalImageAlt = "Miguel Ángel"
+import Badge from "@/components/Badge.astro"
+import LinkedInIcon from "@/components/icons/LinkedIn.astro"
+import MailIcon from "@/components/icons/Mail.astro"
+import SocialPill from "@/components/SocialPill.astro"
+import TypedText from '../components/TypedText.jsx'; // adjust path accordingly
+
+---
+
+<div class="max-w-xl">
+  <div class="flex gap-4 mb-4">
+    <img
+      class="rounded-full shadow-lg size-16"
+      src="/dp.jpg"
+      alt={personalImageAlt}
+    />
+    <a
+      href="https://drive.google.com/file/d/1QjMsPkXq2RwjFChi40M8y7zO9MvLZxKk/view?usp=sharing"
+      target="_blank"
+      rel="noopener"
+      class="flex items-center transition md:justify-center md:hover:scale-105"
+    >
+      <Badge>Checkout my Resume</Badge>
+    </a>
+  </div>
+  <TypedText client:load />
+
+  <p
+    class="mt-6 text-xl text-gray-800 dark:[&>strong]:text-yellow-200 [&>strong]:text-yellow-500 [&>strong]:font-semibold dark:text-gray-300"
+  >
+    Data Analyst with hands-on experience in <strong>SQL, Excel, and Power BI,</strong> turning raw data into actionable insights.
+  </p>
+  <nav class="flex flex-wrap gap-4 mt-8">
+    <SocialPill href="mailto:Harshsuryan1305@gmail.com">
+      <MailIcon class="size-4" />
+      Contáct Me
+    </SocialPill>
+    <SocialPill href="https://www.linkedin.com/in/harsh-rajput-275959174/">
+      <LinkedInIcon class="size-4" />
+      LinkedIn
+    </SocialPill>
+  </nav>
+</div>

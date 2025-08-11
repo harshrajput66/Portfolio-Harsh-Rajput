@@ -1,0 +1,53 @@
+---
+import Layout from "@/layouts/Layout.astro"
+import TypedText from '../components/TypedText.jsx'; 
+import AboutMe from "@/components/AboutMe.astro"
+import Briefcase from "@/components/icons/Briefcase.astro"
+import CodeIcon from "@/components/icons/Code.astro"
+import Experience from "@/components/Experience.astro"
+import ProfileCheck from "@/components/icons/ProfileCheck.astro"
+import Projects from "@/components/Projects.astro"
+import SectionContainer from "@/components/SectionContainer.astro"
+import Hero from "@/components/Hero.astro"
+import TitleSection from "@/components/TitleSection.astro"
+import GridBackground from '../components/GridBackground.astro';
+---
+
+
+<Layout
+  title="Harsh Rajput, Aspiring Data Scientist"
+  description="Passionate about turning data into useful insights"
+>
+  <main class="px-4">
+    <SectionContainer class="py-16 md:py-36">
+      <Hero>
+      </slot>
+    </Hero>
+    </SectionContainer>
+    <div class="space-y-24">
+      <SectionContainer id="experiencia">
+        <TitleSection>
+          <Briefcase class="size-8" />
+          Experience
+        </TitleSection>
+        <Experience />
+      </SectionContainer>
+
+      <SectionContainer id="proyectos">
+        <TitleSection>
+          <CodeIcon class="size-7" />
+          Projects
+        </TitleSection>
+        <Projects />
+      </SectionContainer>
+
+      <SectionContainer id="sobre-mi">
+        <TitleSection>
+          <ProfileCheck class="size-8" />
+          About Me
+        </TitleSection>
+        <AboutMe />
+      </SectionContainer>
+    </div>
+  </main>
+</Layout>

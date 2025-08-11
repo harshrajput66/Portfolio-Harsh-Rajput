@@ -1,0 +1,209 @@
+<canvas id="grid-bg" aria-hidden="true"></canvas>
+
+<style>
+  #grid-bg {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    display: block;
+    background: transparent;
+  }
+</style>
+
+<script type="module">
+(function () {
+  const canvas = document.getElementById('grid-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let width = 0;
+  let height = 0;
+  let mouseX = -10000;
+  let mouseY = -10000;
+
+  // tweakables
+  const gridSize = 35; // smaller grid
+  const influenceRadius = gridSize * 2.2; // proportional bulge radius
+  const bulgeStrength = 0.18; // smaller bump
+  const baseColor = 'rgba(120, 190, 255, 0.20)';
+  const highlightColor = 'rgba(120, 190, 255, 0.20)';
+
+  // starfield settings
+  const starCount = 450;
+  const stars = [];
+  const starColor = 'rgba(255,255,255,0.5)';
+  const starMaxSize = 2;
+
+  // drift settings
+  let driftOffsetX = 0;
+  let driftOffsetY = 0;
+  const driftSpeedX = 0.05;
+  const driftSpeedY = 0.03;
+
+  function setSize() {
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const cssW = Math.max(1, window.innerWidth);
+    const cssH = Math.max(1, window.innerHeight);
+    width = Math.floor(cssW * dpr);
+    height = Math.floor(cssH * dpr);
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    stars.length = 0;
+    for (let i = 0; i < starCount; i++) {
+      stars.push({
+        x: Math.random() * cssW,
+        y: Math.random() * cssH,
+        size: Math.random() * starMaxSize,
+        twinkle: Math.random() * 0.5 + 0.5
+      });
+    }
+  }
+  setSize();
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(setSize, 120);
+  });
+
+  function updatePointer(x, y) {
+    mouseX = x;
+    mouseY = y;
+  }
+  window.addEventListener('mousemove', e => updatePointer(e.clientX, e.clientY), { passive: true });
+  window.addEventListener('touchmove', e => {
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    updatePointer(t.clientX, t.clientY);
+  }, { passive: true });
+  window.addEventListener('mouseout', () => { mouseX = -10000; mouseY = -10000; });
+  window.addEventListener('blur', () => { mouseX = -10000; mouseY = -10000; });
+
+  function hypot(a, b) { return Math.hypot(a, b); }
+
+  function drawStars() {
+    ctx.save();
+    ctx.fillStyle = starColor;
+    for (const star of stars) {
+      const twinkle = 0.75 + 0.25 * Math.sin(Date.now() / 500 + star.x);
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.size * twinkle, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawGrid() {
+    const cssW = window.innerWidth;
+    const cssH = window.innerHeight;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawStars();
+
+    driftOffsetX += driftSpeedX;
+    driftOffsetY += driftSpeedY;
+
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    // vertical lines
+    for (let gx = -gridSize; gx <= cssW + gridSize; gx += gridSize) {
+      ctx.beginPath();
+      for (let y = -gridSize; y <= cssH + gridSize; y += gridSize) {
+        const dx = (gx + driftOffsetX) - mouseX;
+        const dy = (y + driftOffsetY) - mouseY;
+        const dist = hypot(dx, dy);
+        let offsetX = 0, offsetY = 0;
+        if (dist < influenceRadius) {
+          const force = (1 - dist / influenceRadius) * bulgeStrength;
+          offsetX = dx * force;
+          offsetY = dy * force;
+        }
+        ctx.lineTo(gx + offsetX + driftOffsetX, y + offsetY + driftOffsetY);
+      }
+      ctx.strokeStyle = highlightColor;
+      ctx.lineWidth = 2;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.stroke();
+
+      ctx.beginPath();
+      for (let y = -gridSize; y <= cssH + gridSize; y += gridSize) {
+        const dx = (gx + driftOffsetX) - mouseX;
+        const dy = (y + driftOffsetY) - mouseY;
+        const dist = hypot(dx, dy);
+        let offsetX = 0, offsetY = 0;
+        if (dist < influenceRadius) {
+          const force = (1 - dist / influenceRadius) * bulgeStrength;
+          offsetX = dx * force;
+          offsetY = dy * force;
+        }
+        ctx.lineTo(gx + offsetX + driftOffsetX, y + offsetY + driftOffsetY);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = baseColor;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // horizontal lines
+    for (let gy = -gridSize; gy <= cssH + gridSize; gy += gridSize) {
+      ctx.beginPath();
+      for (let x = -gridSize; x <= cssW + gridSize; x += gridSize) {
+        const dx = (x + driftOffsetX) - mouseX;
+        const dy = (gy + driftOffsetY) - mouseY;
+        const dist = hypot(dx, dy);
+        let offsetX = 0, offsetY = 0;
+        if (dist < influenceRadius) {
+          const force = (1 - dist / influenceRadius) * bulgeStrength;
+          offsetX = dx * force;
+          offsetY = dy * force;
+        }
+        ctx.lineTo(x + offsetX + driftOffsetX, gy + offsetY + driftOffsetY);
+      }
+      ctx.strokeStyle = highlightColor;
+      ctx.lineWidth = 2;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.stroke();
+
+      ctx.beginPath();
+      for (let x = -gridSize; x <= cssW + gridSize; x += gridSize) {
+        const dx = (x + driftOffsetX) - mouseX;
+        const dy = (gy + driftOffsetY) - mouseY;
+        const dist = hypot(dx, dy);
+        let offsetX = 0, offsetY = 0;
+        if (dist < influenceRadius) {
+          const force = (1 - dist / influenceRadius) * bulgeStrength;
+          offsetX = dx * force;
+          offsetY = dy * force;
+        }
+        ctx.lineTo(x + offsetX + driftOffsetX, gy + offsetY + driftOffsetY);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = baseColor;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  let raf = null;
+  function loop() {
+    drawGrid();
+    raf = requestAnimationFrame(loop);
+  }
+  loop();
+
+  window.addEventListener('beforeunload', () => {
+    if (raf) cancelAnimationFrame(raf);
+    window.removeEventListener('resize', setSize);
+  });
+})();
+</script>
